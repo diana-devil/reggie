@@ -1,0 +1,46 @@
+server:
+  port: 80
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: 1234
+    url: jdbc:mysql:///reggie
+
+mybatis-plus:
+  global-config:
+    db-config: #命名方式
+      id-type: assign_id  #id生成方式
+      logic-delete-field: isDeleted  #表示逻辑删除的属性
+      logic-delete-value: 1   #表示删除的默认值
+      logic-not-delete-value: 0  #表示不删除的默认值
+
+
+  configuration: #日志输出
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    map-underscore-to-camel-case: true   #在映射实体或者属性时，将数据库表名和字段名中的下划线去掉，按照驼峰命名法命名
+
+reggie:  #不要加双引号
+  filepath: D:\生活\学习\西电杭研院\云共享\OneDrive\文档\云共享\代码库\java\项目\瑞吉外卖\images\dish\
+
+SMS:
+  PhoneNumbers: 17854201283
+  SignName: 阿里云短信测试
+  TemplateCode: SMS_154950909
+  accessKeyId: LTAI5tEwZ2JRUYRwmgfE1GmK
+  secret: a0D7fJdrnR6736PqEkAdeF3a5d9LRu
+
+
+
+
+
+
+
+
+
+
+
+
+
+
