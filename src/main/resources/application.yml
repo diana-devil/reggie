@@ -55,7 +55,7 @@ spring:
 
 
 reggie:  #不要加双引号
-  filepath: /diane/java-project/project/reggie/images
+  filepath: /diane/java-project/project/reggie/images/
 
 
 
