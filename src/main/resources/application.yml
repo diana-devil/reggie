@@ -1,7 +1,7 @@
 #设置启用的环境
 spring:
   profiles:
-    active: linux
+    active: window
 
 
 server:
