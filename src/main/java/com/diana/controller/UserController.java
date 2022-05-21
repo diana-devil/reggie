@@ -10,6 +10,8 @@ import com.diana.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @RestController
@@ -33,9 +36,12 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    @Autowired//注入redis
+    private StringRedisTemplate stringRedisTemplate;
+
 
     /**
-     *  发送短信验证码
+     *  发送短信验证码,存入reids中
      *  前端传入 phone，封装进user中
      * @param user
      * @return
@@ -49,9 +55,15 @@ public class UserController {
             //如果手机号不为空
             //随机生成验证码
             Integer code = ValidateCodeUtils.generateValidateCode(6);
-            //将验证码存入session域中，方便后期比对  键为手机号，值为验证码
+
+            //将验证码存入redis中，方便后期比对  键为手机号，值为验证码，时间为5分钟
             log.info("{}",code);
-            request.getSession().setAttribute(user.getPhone(),code);
+            stringRedisTemplate.opsForValue().set(phone,code.toString(),5, TimeUnit.MINUTES);
+
+
+            //将验证码存入session域中，方便后期比对  键为手机号，值为验证码
+//            log.info("{}",code);
+//            request.getSession().setAttribute(user.getPhone(),code);
             //调用阿里云提供的短信服务API发送短信
 //            SMSUtils.sendMessage(SignName,TemplateCode,phone,code.toString());
 
@@ -73,12 +85,16 @@ public class UserController {
     public R<User> UserLogin(@RequestBody User user,HttpServletRequest request){
         log.info(user.toString());
 
-        //获取手机号和验证码，并去跟session域中的数据进行对比
-        Integer code = (Integer) request.getSession().getAttribute(user.getPhone());
-        if(!code.equals(user.getCode())){
+        //获取手机号和验证码，并去跟session域(redis)中的数据进行对比
+//        Integer code = (Integer) request.getSession().getAttribute(user.getPhone()); //session域中获取
+        String code = stringRedisTemplate.opsForValue().get(user.getPhone());//reids中获取
+        log.info(code);
+
+        if(!user.getCode().toString().equals(code)){
             //如果验证码不一样
             return R.error("验证码不正确,请重新输入！");
         }
+
         //验证码一样
         // 如果是新用户，将用户信息存入数据库，并获取用户id；
         LambdaQueryWrapper<User> queryWrapper=new LambdaQueryWrapper<>();
@@ -95,9 +111,11 @@ public class UserController {
         //如果是老用户，直接获取用户id
         Long userId = user1.getId();
 
-
         //将用户id存入session域
         request.getSession().setAttribute("user",userId);
+
+        //登陆成功，删除reids中记录
+        stringRedisTemplate.delete(user.getPhone());
 
         return R.success(user1);
 
