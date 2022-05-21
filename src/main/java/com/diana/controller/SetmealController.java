@@ -14,6 +14,8 @@ import com.diana.service.SetmealService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -56,6 +58,7 @@ public class SetmealController {
      * @param setmealDto  dto对象 其继承了父类Setmeal的全部属性，又封装了菜系名称和菜品列表
      * @return
      */
+    @CacheEvict(value = "setmealCache",allEntries = true)//删除当前分类下所有缓存
     @PostMapping
     public R<String> addSetMeal(@RequestBody SetmealDto setmealDto){
         //调用service层方法
@@ -71,6 +74,7 @@ public class SetmealController {
      * @param ids
      * @return
      */
+    @CacheEvict(value = "setmealCache",allEntries = true)//删除当前分类下所有缓存
     @DeleteMapping
     public R<String> deleteMeal(@RequestParam List<Long> ids){
 //    public R<String> deleteMeal(Long[] ids){
@@ -102,6 +106,7 @@ public class SetmealController {
      * @param setmealDto
      * @return
      */
+    @CacheEvict(value = "setmealCache",key = "#setmealDto.categoryId+'_'+#setmealDto.status")
     @PutMapping
     public R<String> updateMealAndDish(@RequestBody SetmealDto setmealDto){
 
@@ -137,6 +142,7 @@ public class SetmealController {
      * @param setmeal  套餐对象
      * @return
      */
+    @Cacheable(value = "setmealCache",key = "#setmeal.categoryId+'_'+#setmeal.status")
     @GetMapping("/list")
     public R<List<Setmeal>> getSetMeal(Setmeal setmeal){ //问号接参数
         log.info(setmeal.toString());

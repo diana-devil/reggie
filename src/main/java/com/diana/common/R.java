@@ -1,16 +1,19 @@
 package com.diana.common;
 
 import lombok.Data;
+
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
 
 /***
  * 通用返回结果类
+ * implements Serializable   实现序列化接口 为缓存使用
  * @param <T>
  */
 @Data
-public class R<T> {
+public class R<T> implements Serializable {
 
     private Integer code; //编码：1成功，0和其它数字为失败
 

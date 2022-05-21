@@ -49,7 +49,13 @@ spring:
     host: localhost
     database: 0
 
-
+  #设置缓存，默认使用redis
+  cache:
+    redis:
+      time-to-live: 1800s #设置过期时间  30分钟
+      cache-null-values: false   #是否缓存空值
+      use-key-prefix: true  #是否使用键前缀   使用——"SMSCode::17854201283"  不使用——"17854201283" 默认是true，最好是true
+      key-prefix: reggie_  #设置键前缀是啥
 
 reggie:  #不要加双引号
   filepath: D:\生活\学习\西电杭研院\云共享\OneDrive\文档\云共享\代码库\java\项目\瑞吉外卖\images\dish\
