@@ -14,12 +14,17 @@ import com.diana.service.DishService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -35,6 +40,9 @@ public class DishController {
 
     @Autowired
     private CategoryService categoryService;
+
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     /**
      * 菜品分页查询
@@ -106,6 +114,10 @@ public class DishController {
         log.info(dishDto.toString());
 
         dishService.saveWithFlavor(dishDto);
+        //清理当前新增菜品的缓存
+        String key="dish_"+dishDto.getCategoryId()+"_"+dishDto.getStatus();
+        redisTemplate.delete(key);
+
 
         return  R.success("添加成功");
     }
@@ -141,6 +153,16 @@ public class DishController {
         log.info(dishDto.toString());
         //调用service 方法
         dishService.updateWithFlavor(dishDto);
+
+        //清理所有菜品的缓存数据
+//        Set keys = redisTemplate.keys("dish_*");//获取所有以dish_开头的键
+//        redisTemplate.delete(keys);
+
+        //清理当前修改菜品的缓存
+        String key="dish_"+dishDto.getCategoryId()+"_"+dishDto.getStatus();
+        redisTemplate.delete(key);
+
+
 
         return R.success("修改成功！！");
     }
@@ -195,7 +217,11 @@ public class DishController {
 //                return R.error("当前菜品已删除，请刷新后重试！！");
 //            }
             dishService.removeById(id);
+
         }
+        //清理所有菜品的缓存数据
+        Set keys = redisTemplate.keys("dish_*");//获取所有以dish_开头的键
+        redisTemplate.delete(keys);
         //全部删除完成，没有任何问题，返回删除成功
         return R.success("删除成功！！");
     }
@@ -205,13 +231,26 @@ public class DishController {
     /**
      * 原本 后台，新增套餐时使用
      * 复用移动端，点击左侧 菜系名称时 生效
-     *  根据categoryId,查询菜品名称
+     *  根据categoryId,查询菜品信息，先从缓存中查找，如果缓存有，就不查数据库了，如果缓存无，将数据库信息存入缓存
      * @param dish Dish 对象，现阶段只有categoryId一个值，但是复用性更好,这不是后期复用了status 查询状态
      * @return R<List<Dish>>  对应菜系id的全部菜品信息
      * @return R<List<DishDto>>  返回对应菜系id的全部菜品信息，同时返回菜品对应的口味信息，修改
      */
     @GetMapping("/list")
     public R<List<DishDto>> getDishList(Dish dish){
+
+        List<DishDto> dishDtos=null;
+        log.info("查询redis");
+        //动态构造key
+        String key="dish_"+dish.getCategoryId()+"_"+dish.getStatus();
+        //从缓存获取数据
+        dishDtos = (List<DishDto>)redisTemplate.opsForValue().get(key);
+        //如果缓存中有
+        if(dishDtos!=null){
+            return R.success(dishDtos);
+        }
+        //如果缓存中无，查询数据库
+        log.info("查询数据库");
 
         //在后台管理页面 需要获取菜品信息，  这些就够了
         //创建查询对象
@@ -233,7 +272,7 @@ public class DishController {
 
 
         //遍历每一个菜品，封装其口味信息
-        List<DishDto> dishDtos=dishes.stream().map((item)->{
+        dishDtos=dishes.stream().map((item)->{
             //新建dishDto对象，并copy dish的值
             DishDto dishDto=new DishDto();
             BeanUtils.copyProperties(item,dishDto);
@@ -250,6 +289,12 @@ public class DishController {
 
 
         log.info(dishDtos.toString());
+
+
+        //将数据库查询信息存入redis,60分钟
+        redisTemplate.opsForValue().set(key,dishDtos,60, TimeUnit.MINUTES);
+
+
         return R.success(dishDtos);
     }
 
