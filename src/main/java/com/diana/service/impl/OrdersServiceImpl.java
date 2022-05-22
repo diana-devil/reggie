@@ -50,9 +50,9 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
         //补充用户数据
         User user = userService.getById(userId);
-        if(user.getName()!=null){
-            orders.setUserName(user.getName());//用户名
-        }
+//        if(user.getName()!=null){
+//            orders.setUserName(user.getName());//用户名
+//        }
         if(user.getPhone()!=null){
             orders.setPhone(user.getPhone());//手机号
         }

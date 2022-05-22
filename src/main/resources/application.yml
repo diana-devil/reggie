@@ -1,5 +1,8 @@
 #设置启用的环境
 spring:
+#  #运行bean定义覆盖   后面覆盖前面
+#  main:
+#    allow-bean-definition-overriding: true
   profiles:
     active: window
 
@@ -39,6 +42,9 @@ spring:
     username: root
     password: 1234
     url: jdbc:mysql:///reggie
+    #测试linux的数据库是否好用
+#    url: jdbc:mysql://192.168.159.100:3306/reggie  #使用linux 下数据库作为主库
+#    password: Woshi123ali@
   #配置当前环境
   config:
     activate:
@@ -68,10 +74,23 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
     password: Woshi123ali@
-    url: jdbc:mysql:///reggie
+    url: jdbc:mysql://192.168.159.100:3306/reggie
   config:
     activate:
       on-profile: linux
+  #配置redis
+  redis:
+    port: 6379
+    host: 192.168.159.100
+    database: 0
+
+  #设置缓存，默认使用redis
+  cache:
+    redis:
+      time-to-live: 1800s #设置过期时间  30分钟
+      cache-null-values: false   #是否缓存空值
+      use-key-prefix: true  #是否使用键前缀   使用——"SMSCode::17854201283"  不使用——"17854201283" 默认是true，最好是true
+      key-prefix: reggie_  #设置键前缀是啥
 
 
 reggie:  #不要加双引号
