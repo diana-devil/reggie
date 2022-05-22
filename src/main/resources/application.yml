@@ -1,10 +1,54 @@
 #设置启用的环境
 spring:
-#  #运行bean定义覆盖   后面覆盖前面
-#  main:
-#    allow-bean-definition-overriding: true
+  #运行bean定义覆盖   后面覆盖前面
+  main:
+    allow-bean-definition-overriding: true
+
+  #选择运行环境
   profiles:
     active: window
+
+  #设置主从数据库关系
+  shardingsphere:
+    datasource:
+      names:
+        master,slave #名字随便起，对应起来即可
+
+      #主数据源（Linux）
+      master:
+        type: com.alibaba.druid.pool.DruidDataSource
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        url: jdbc:mysql://192.168.159.100:3306/reggie?characterEncoding=utf-8
+        username: root
+        password: Woshi123ali@
+
+      #从数据源（window）
+      slave:
+        type: com.alibaba.druid.pool.DruidDataSource
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        url: jdbc:mysql:///reggie?characterEncoding=utf-8
+        username: root
+        password: 1234
+
+    masterslave:
+      #读写分离配置
+      load-balance-algorithm-type: round_robin  #轮询
+      #最终数据源名称
+      name: dataSource
+      #主库数据源名称
+      master-data-source-name: master
+      #从库数据源名称列表，多个逗号分隔
+      slave-data-source-names: slave
+    props:
+      sql:
+        show: true #开启SQL显示，默认false
+  #设置缓存，默认使用redis
+  cache:
+    redis:
+      time-to-live: 1800s #设置过期时间  30分钟
+      cache-null-values: false   #是否缓存空值
+      use-key-prefix: true  #是否使用键前缀   使用——"SMSCode::17854201283"  不使用——"17854201283" 默认是true，最好是true
+      key-prefix: reggie_  #设置键前缀是啥
 
 
 
@@ -37,11 +81,11 @@ SMS:
 ---
 spring:
   #配置数据库
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    username: root
-    password: 1234
-    url: jdbc:mysql:///reggie
+#  datasource:
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+#    username: root
+#    password: 1234
+#    url: jdbc:mysql:///reggie
     #测试linux的数据库是否好用
 #    url: jdbc:mysql://192.168.159.100:3306/reggie  #使用linux 下数据库作为主库
 #    password: Woshi123ali@
@@ -55,13 +99,13 @@ spring:
     host: localhost
     database: 0
 
-  #设置缓存，默认使用redis
-  cache:
-    redis:
-      time-to-live: 1800s #设置过期时间  30分钟
-      cache-null-values: false   #是否缓存空值
-      use-key-prefix: true  #是否使用键前缀   使用——"SMSCode::17854201283"  不使用——"17854201283" 默认是true，最好是true
-      key-prefix: reggie_  #设置键前缀是啥
+#  #设置缓存，默认使用redis
+#  cache:
+#    redis:
+#      time-to-live: 1800s #设置过期时间  30分钟
+#      cache-null-values: false   #是否缓存空值
+#      use-key-prefix: true  #是否使用键前缀   使用——"SMSCode::17854201283"  不使用——"17854201283" 默认是true，最好是true
+#      key-prefix: reggie_  #设置键前缀是啥
 
 reggie:  #不要加双引号
   filepath: D:\生活\学习\西电杭研院\云共享\OneDrive\文档\云共享\代码库\java\项目\瑞吉外卖\images\dish\
@@ -70,11 +114,11 @@ reggie:  #不要加双引号
 #配置linux下信息
 ---
 spring:
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    username: root
-    password: Woshi123ali@
-    url: jdbc:mysql://192.168.159.100:3306/reggie
+#  datasource:
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+#    username: root
+#    password: Woshi123ali@
+#    url: jdbc:mysql://192.168.159.100:3306/reggie
   config:
     activate:
       on-profile: linux
@@ -83,14 +127,6 @@ spring:
     port: 6379
     host: 192.168.159.100
     database: 0
-
-  #设置缓存，默认使用redis
-  cache:
-    redis:
-      time-to-live: 1800s #设置过期时间  30分钟
-      cache-null-values: false   #是否缓存空值
-      use-key-prefix: true  #是否使用键前缀   使用——"SMSCode::17854201283"  不使用——"17854201283" 默认是true，最好是true
-      key-prefix: reggie_  #设置键前缀是啥
 
 
 reggie:  #不要加双引号
