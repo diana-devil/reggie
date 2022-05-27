@@ -11,6 +11,10 @@ import com.diana.pojo.SetmealDish;
 import com.diana.service.CategoryService;
 import com.diana.service.SetmealDishService;
 import com.diana.service.SetmealService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +29,7 @@ import java.util.stream.Collectors;
 /**
  * 套餐管理
  */
+@Api(tags = "套餐接口")
 @Slf4j
 @RestController
 @RequestMapping("/setmeal")
@@ -44,6 +49,12 @@ public class SetmealController {
      * @return  R<Page<SetmealDto>>
      */
     @GetMapping("/page")
+    @ApiOperation(value = "套餐分页查询")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="page" ,value = "当前页数", required = true),//说明参数
+            @ApiImplicitParam(name="pageSize" ,value = "每页显示个数", required = true),//说明参数
+            @ApiImplicitParam(name="name" ,value = "套餐名称", required = false)//说明参数
+    })//说明多个参数
     public R<Page<SetmealDto>> getMealByPage(int page,int pageSize,String name){
 
         //调用service层方法，完成分页查询
@@ -60,6 +71,8 @@ public class SetmealController {
      */
     @CacheEvict(value = "setmealCache",allEntries = true)//删除当前分类下所有缓存
     @PostMapping
+    @ApiOperation(value = "新增套装接口")
+    @ApiImplicitParam(name="setmealDto" ,value = "套餐dto对象", required = true)//说明参数
     public R<String> addSetMeal(@RequestBody SetmealDto setmealDto){
         //调用service层方法
         setmealService.saveWithDish(setmealDto);
@@ -76,6 +89,8 @@ public class SetmealController {
      */
     @CacheEvict(value = "setmealCache",allEntries = true)//删除当前分类下所有缓存
     @DeleteMapping
+    @ApiOperation(value = "套装删除")
+    @ApiImplicitParam(name="ids" ,value = "套餐ids", required = true)//说明参数
     public R<String> deleteMeal(@RequestParam List<Long> ids){
 //    public R<String> deleteMeal(Long[] ids){
         //调用service 层方法
@@ -91,6 +106,8 @@ public class SetmealController {
      * @return
      */
     @GetMapping("/{id}")
+    @ApiOperation(value = "套装数据回显")
+    @ApiImplicitParam(name="id" ,value = "套餐id", required = true)//说明参数
     public R<SetmealDto> getMealAndDish(@PathVariable Long id){
 
         //调用service层方法
@@ -108,6 +125,8 @@ public class SetmealController {
      */
     @CacheEvict(value = "setmealCache",key = "#setmealDto.categoryId+'_'+#setmealDto.status")
     @PutMapping
+    @ApiOperation(value = "套餐修改")
+    @ApiImplicitParam(name="setmealDto" ,value = "套餐dto对象", required = true)//说明参数
     public R<String> updateMealAndDish(@RequestBody SetmealDto setmealDto){
 
         setmealService.updateMealAndDish(setmealDto);
@@ -122,6 +141,11 @@ public class SetmealController {
      * @return
      */
     @PostMapping("/status/{status}")
+    @ApiOperation(value = "修改销售状态")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="ids" ,value = "套餐ids", required = true),//说明参数
+            @ApiImplicitParam(name="status" ,value = "销售状态", required = true)//说明参数
+    })//说明多个参数
     public R<String> updateStatus(Long[] ids,@PathVariable int status){
 
         for(Long id:ids){
@@ -144,6 +168,8 @@ public class SetmealController {
      */
     @Cacheable(value = "setmealCache",key = "#setmeal.categoryId+'_'+#setmeal.status")
     @GetMapping("/list")
+//    @ApiOperation(value = "暂时未做出来")  //有问题
+//    @ApiImplicitParam(name="setmeal" ,value = "套餐对象", required = true)//说明参数
     public R<List<Setmeal>> getSetMeal(Setmeal setmeal){ //问号接参数
         log.info(setmeal.toString());
         //根据 categoryId和status查询套餐的菜品
@@ -167,6 +193,8 @@ public class SetmealController {
      * @return  返回套餐信息和套餐对应的菜品   dto对象list集合  R<SetmealDto>
      */
     @GetMapping("dish/{setmealId}")
+    @ApiOperation(value = "查询套餐对应菜品")//说明方法的用途
+    @ApiImplicitParam(name="setmealId" ,value = "套餐id", required = true)//说明参数
     public R<List<SetmealDish>> getSetMeal(@PathVariable Long setmealId){//路径参数 直接接
 
 //        //新建 SetmealDto 对象
