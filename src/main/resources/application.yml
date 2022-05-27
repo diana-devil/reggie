@@ -26,7 +26,7 @@ spring:
       slave:
         type: com.alibaba.druid.pool.DruidDataSource
         driver-class-name: com.mysql.cj.jdbc.Driver
-        url: jdbc:mysql:///reggie?characterEncoding=utf-8
+        url: jdbc:mysql://169.254.176.155/reggie?characterEncoding=utf-8
         username: root
         password: 1234
 
@@ -54,7 +54,7 @@ spring:
 
 #配置服务端口
 server:
-  port: 80
+  port: 8080
 
 #配置mybatisplus
 mybatis-plus:
