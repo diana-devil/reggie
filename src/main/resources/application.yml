@@ -6,7 +6,7 @@ spring:
 
   #选择运行环境
   profiles:
-    active: window
+    active: linux
 
   #设置主从数据库关系
   shardingsphere:
