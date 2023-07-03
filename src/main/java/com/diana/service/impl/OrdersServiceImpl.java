@@ -53,9 +53,9 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 //        if(user.getName()!=null){
 //            orders.setUserName(user.getName());//用户名
 //        }
-        if(user.getPhone()!=null){
-            orders.setPhone(user.getPhone());//手机号
-        }
+//        if(user.getPhone()!=null){
+//            orders.setPhone(user.getPhone());//手机号
+//        }
 
 
         //补充地址数据

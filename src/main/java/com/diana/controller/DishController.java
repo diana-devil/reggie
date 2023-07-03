@@ -290,7 +290,6 @@ public class DishController {
 
         log.info(dishDtos.toString());
 
-
         //将数据库查询信息存入redis,60分钟
         redisTemplate.opsForValue().set(key,dishDtos,60, TimeUnit.MINUTES);
 
